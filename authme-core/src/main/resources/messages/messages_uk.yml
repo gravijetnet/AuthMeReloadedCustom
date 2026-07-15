@@ -1,0 +1,216 @@
+# List of global tags:
+# %nl% - Goes to new line.
+# %username% - Replaces the username of the player receiving the message.
+# %displayname% - Replaces the nickname (and colors) of the player receiving the message.
+
+# Registration
+registration:
+    disabled: '&cВнутрішньоігрову реєстрацію зараз вимкнено.'
+    name_taken: '&cТакий нікнейм вже зареєстровано.'
+    register_request: '&3Перш ніж почати гру, вам потрібно зареєструвати свій нікнейм!%nl%&3Для цього просто введіть команду "/register <пароль> <повторПароля>"'
+    command_usage: '&cСинтаксис: /register <пароль> <повторПароля>'
+    reg_only: '&4Лише зареєстровані гравці можуть підключатись до сервера!%nl%&4Будь ласка, відвідайте http://example.com для реєстрації.'
+    success: '&2Реєстрація пройшла успішно!'
+    kicked_admin_registered: 'Адміністратор вас зареєстрував; Будь ласка, авторизуйтесь знову!'
+
+# Password errors on registration
+password:
+    match_error: '&cПаролі не співпадають!'
+    name_in_password: '&cНе можна використовувати свій нікнейм у якості пароля! Будь ласка, виберіть щось інакше...'
+    unsafe_password: '&cЦей пароль надто простий! Будь ласка, придумайте інакший...'
+    forbidden_characters: '&4Ваш пароль містить недопустимі символи. Підберіть інакший...%nl%&4(Reg-ex: %valid_chars)'
+    wrong_length: '&cВаш пароль надто короткий або надто довгий! Спробуйте інакший...'
+
+# Login
+login:
+    command_usage: '&cСинтаксис: /login <пароль>'
+    wrong_password: '&cНевірний пароль!'
+    success: '&2Успішна авторизація!'
+    login_request: '&cДля авторизації, введіть команду "/login <пароль>"'
+    timeout_error: '&4Час для авторизації сплинув. Будь ласка, спробуйте ще раз!'
+
+# Errors
+error:
+    denied_command: '&cДля використання цієї команди потрібна авторизація.'
+    denied_chat: '&cДля доступу до чату потрібна авторизація.'
+    unregistered_user: '&cЦей гравець не є зареєстрованим.'
+    not_logged_in: '&cВи не авторизовані!'
+    no_permission: '&4У вас недостатньо прав, щоб застосувати цю команду!'
+    unexpected_error: '&4[AuthMe] Помилка. Будь ласка, повідомте адміністратора!'
+    max_registration: '&cВичерпано ліміт реєстрацій (%reg_count/%max_acc %reg_names) для вашого підключення!'
+    logged_in: '&cВи вже авторизовані!'
+    kick_for_vip: '&3Вас кікнуто, внаслідок того, що VIP гравець зайшов на сервер коли небуло вільних місць.'
+    kick_unresolved_hostname: '&cЗнайдена помилка: невирішене ім''я вузла гравця!'
+    tempban_max_logins: '&cВаш IP тимчасово заблоковано, із‒за багатократного введення хибного пароля.'
+
+# AntiBot
+antibot:
+    kick_antibot: 'На сервер здійснено DDoS атаку. Будь ласка, зачекайте декілька хвилин доки активність спаде.'
+    auto_enabled: '&4[AntiBotService] Ненормативне число з’єднань. Активовано антибот систему!'
+    auto_disabled: '&2[AntiBotService] Антибот систему деактивовано після %m хв. активності.'
+
+# Unregister
+unregister:
+    success: '&cДані про реєстрацію успішно видалено'
+    command_usage: '&cСинтаксис: /unregister <пароль>'
+
+# Other messages
+misc:
+    account_not_activated: '&cВаш акаунт ще не активовано. Будь ласка, провірте свою електронну пошту!'
+    password_changed: '&2Пароль успішно змінено!'
+    logout: '&2Ви вийшли зі свого акаунта!'
+    reload: '&2Конфігурації та базу даних було успішно перезавантажено!'
+    usage_change_password: '&cСинтаксис: /changepassword <старийПароль> <новийПароль>'
+    accounts_owned_self: 'Кількість ваших твінк‒акаунтів: %count:'
+    accounts_owned_other: 'Кількість твінк‒акаунтів гравця %name: %count'
+
+# Session messages
+session:
+    valid_session: '&2Сесію відновлено.'
+    invalid_session: '&cСесію було розірвано внаслідок зміни IP.'
+
+# Error messages when joining
+on_join_validation:
+    same_ip_online: 'Перевищено ліміт на авторизацію з одного IP.'
+    same_nick_online: '&4Хтось з таким ніком зараз вже сидить на сервері!'
+    name_length: '&4Ваш нікнейм надто короткий або надто довгий!'
+    characters_in_name: '&4Ваш нікнейм містить недопустимі символи! Reg-ex: %valid_chars'
+    kick_full_server: '&4Сервер переповнено! Доведеться зачекати доки хтось вийде.'
+    country_banned: '&4Your country is banned from this server!'
+    not_owner_error: 'Цей акаунт вам не належить! Будь ласка, оберіть інакший нікнейм!'
+    invalid_name_case: 'Регістр у вашому нікнеймі відрізняється від регістру при реєстрації.%nl%Поточний регістр: &c%invalid&f.  Валідний регістр: &a%valid&f.%nl%Будь ласка, перезайдіть з валідним регістром!'
+    quick_command: 'Ви занадто швидко використовували команду! Будь ласка, приєднайтесь знову до сервера і почекайте, перш ніж використовувати будь-яку команду.'
+
+# Email
+email:
+    add_email_request: '&3Не забудьте прив’язати електронну пошту до свого акаунта, за допомогою команди "/email add <e-mail> <e-mail повторно>"'
+    usage_email_add: '&cСинтаксис: /email add <e-mail> <e-mail повторно>'
+    usage_email_change: '&cСинтаксис: /email change <старий e-mail> <новий e-mail>'
+    new_email_invalid: '&cНекоректний формат.'
+    old_email_invalid: '&cСтарий e-mail, що прив’язано до вашого акаунта, відрізняється від введеного вами.'
+    invalid: '&cФормат вказаного e-mail’у є некоректним, або його домен внесено до блеклисту.'
+    added: '&2Електронну пошту успішно прив’язано до вашого акаунта.'
+    add_not_allowed: '&cДобавлення електронної пошти заборонено'
+    request_confirmation: '&cАдреси не співпадають.'
+    changed: '&2E-mail успішно змінено.'
+    change_not_allowed: '&cЗмiнення пошти заборонено'
+    email_show: '&2Ваша нинiшня адреса електронної пошти: &f%email'
+    no_email_for_account: '&2Наразі у вас немає адреси електронної пошти, пов’язаної з цим акаунтом.'
+    already_used: '&4До цієї електронної пошти прив’язано забагато акаунтів!'
+    incomplete_settings: '&4Не всі необхідні налаштування є встановленими, щоб надсилати електронну пошту. Будь ласка, повідомте адміністратора!'
+    send_failure: 'Не вдалося надіслати лист. Зверніться до адміністратора.'
+    change_password_expired: 'Ви більше не можете змінювати свій пароль, використовуючи цю команду.'
+    email_cooldown_error: '&cНещодавно вже було надіслано електронний лист. Заждиiть ще %time перш нiж вiдправляти ще листа.'
+
+# Password recovery by email
+recovery:
+    forgot_password_hint: 'Забули пароль? Можете скористатись командою &9/email recovery &f<&9ваш e-mail&f>'
+    command_usage: '&cСинтаксис: /email recovery <e-mail>'
+    email_sent: '&2Лист для відновлення доступу надіслано. Будь ласка, провірте свою пошту!'
+    code:
+        code_sent: 'На вашу адресу електронної пошти надіслано код відновлення для скидання пароля.'
+        incorrect: 'Код відновлення невірний! У вас залишилось ще %count спроб.'
+        tries_exceeded: 'Ви перевищили максимальну кількість спроб, щоб ввести код відновлення. Використовуйте "/email recovery [email]" для створення нового запросу.'
+        correct: 'Код відновлення введено правильно!'
+        change_password: 'Будь ласка, використовуйте команду /email setpassword <НовийПароль> щоб негайно змінити свій пароль.'
+
+# Captcha
+captcha:
+    usage_captcha: '&3Для продовження доведеться ввести капчу — "/captcha %captcha_code"'
+    wrong_captcha: '&cНевірно введена капча! Спробуйте ще раз — "/captcha %captcha_code"'
+    valid_captcha: '&2Капчу прийнято.'
+    captcha_for_registration: 'Для того, щоб зареєструвати, ви повинні спочатку вирішити капчу, скористайтеся командою: /captcha %captcha_code'
+    register_captcha_valid: '&2Ви можете зареєструватися використовуя: /register'
+
+# Verification code
+verification:
+    code_required: '&3Ця команда вимагає підтвердження електронною поштою! Перевірте свою пошту та дотримуйтесь вказівок у електронному листi.'
+    command_usage: '&cВикористання: /verification <code>'
+    incorrect_code: '&cНеправильний код, введіть "/verification <код>" у чаті, використовуючи код, отриманий електронною поштою'
+    success: '&2Ваша особа підтверджена! Тепер ви можете виконати всі команди протягом нинiшнього сеансу!'
+    already_verified: '&2Ви вже можете виконати кожну команду протягом нинiшнього сеансу!'
+    code_expired: '&3Ваш код закінчився! Виконайте ще одну команду, щоб отримати новий код!'
+    email_needed: '&3Щоб підтвердити свою особу, вам потрібно зв’язати електронну адресу зі своїм акаунтом!!'
+
+# Time units
+
+# Dialog UI
+dialog:
+  login:
+    title: '&6Вхід'
+    password: '&fПароль'
+    button: '&aУвійти'
+  register:
+    title: '&6Реєстрація'
+    password: '&fПароль'
+    confirm_password: '&fПідтвердьте пароль'
+    email: '&fЕлектронна пошта'
+    confirm_email: '&fПідтвердьте електронну пошту'
+    button: '&aЗареєструватися'
+  two_factor:
+    title: '&6Двофакторна автентифікація'
+    code: '&fКод 2FA'
+    button: '&aПеревірити'
+  button:
+    cancel: '&cСкасувати'
+
+time:
+    second: 'секунда'
+    seconds: 'секунд'
+    minute: 'хвилина'
+    minutes: 'хвилин'
+    hour: 'година'
+    hours: 'годин'
+    day: 'день'
+    days: 'днiв'
+
+# Two-factor authentication
+two_factor:
+    code_created: '&2Ваш секретний код — %code %nl%&2Можете зкопіювати його за цим посиланням — %url'
+    confirmation_required: 'Підтвердьте свій код за допомогою / 2fa confirm <код>'
+    code_required: 'Будь ласка, надішліть свій двофакторний код аутентифікації використовуючи: /2fa code <code>'
+    already_enabled: 'Для вашого акаунту вже включена двофакторна аутентифікація!'
+    enable_error_no_code: 'Для вас не створено жодного ключа двухфакторної аутентифiкацii або термін його дії закінчився. Будь ласка, біжи /2fa add'
+    enable_success: 'Двофакторна автентифікація для вашого акаунта успішно включена'
+    enable_error_wrong_code: 'Неправильний код або код минув. Будь ласка, використовуйте: /2fa add'
+    not_enabled_error: 'Двофакторна аутентифікація не включена для вашого акаунту. Використовуйте: /2fa add'
+    removed_success: 'Двофакторну авторизацію успішно видалено з вашого акаунту'
+    invalid_code: 'Невірний код!'
+
+# Повідомлення валідації команд
+command:
+    player_only: '&cЦя команда лише для гравців.'
+    player_only_alternative: '&cТільки для гравців! Будь ласка, використовуйте %alternative замість цього.'
+    failed_to_parse: '&4Не вдалося розібрати команду AuthMe!'
+    unknown: '&4Невідома команда!'
+    incorrect_arguments: '&4Неправильні аргументи команди!'
+    did_you_mean: '&eВи мали на увазі &6%cmd&e?'
+    see_help: '&eВикористовуйте команду &6/%cmd&e для перегляду довідки.'
+    detailed_help: '&6Детальна довідка: &f/%cmd'
+
+# Повідомлення адміністративних команд
+admin:
+    force_login:
+        player_offline: '&cГравець повинен бути в мережі!'
+        forbidden: '&cВи не можете примусово увійти за гравця %name!'
+        success: '&2Примусовий вхід для %name виконано!'
+    accounts:
+        ip_not_found: '&cЦей IP-адрес не існує в базі даних.'
+        single_account: '&2%name — гравець з одним акаунтом.'
+        no_last_ip: '&cОстанній IP-адрес гравця невідомий.'
+    email_show: '&2Пошта %name: %email'
+    antibot:
+        status: '&2Статус AntiBot: %status'
+        override_enabled: '&2Ручне управління AntiBot: увімкнено!'
+        override_disabled: '&2Ручне управління AntiBot: вимкнено!'
+        invalid_mode: '&cНеправильний режим AntiBot!'
+    reload:
+        db_type_change: '&eПримітка: не можна змінити тип бази даних під час /authme reload.'
+        error: '&cВиникла помилка під час перезавантаження AuthMe.'
+    spawn:
+        set_success: '&2Нову точку спавну успішно визначено.'
+        set_fail: '&cSetSpawn не вдався, спробуйте ще раз.'
+        first_set_success: '&2Нову першу точку спавну успішно визначено.'
+        first_set_fail: '&cSetFirstSpawn не вдався, спробуйте ще раз.'
+        not_defined: '&cСпавн не вдався, спробуйте визначити точку спавну.'
+        first_not_defined: '&cПерший спавн не вдався, спробуйте визначити першу точку спавну.'

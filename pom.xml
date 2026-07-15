@@ -1,0 +1,933 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>fr.xephi</groupId>
+    <artifactId>authme-parent</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <name>AuthMeReloaded</name>
+    <description>The first authentication plugin for the Bukkit API!</description>
+    <inceptionYear>2013</inceptionYear>
+    <url>https://github.com/AuthMe/AuthMeReloaded</url>
+
+    <organization>
+        <name>AuthMe-Team</name>
+        <url>https://github.com/AuthMe</url>
+    </organization>
+
+    <scm>
+        <connection>scm:git:https://github.com/AuthMe/AuthMeReloaded.git</connection>
+        <developerConnection>scm:git:git@github.com:AuthMe/AuthMeReloaded.git</developerConnection>
+        <url>https://github.com/AuthMe/AuthMeReloaded</url>
+    </scm>
+
+    <ciManagement>
+        <system>jenkins</system>
+        <url>https://ci.codemc.io/job/AuthMe/job/AuthMeReloaded/</url>
+    </ciManagement>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/AuthMe/AuthMeReloaded/issues</url>
+    </issueManagement>
+
+    <distributionManagement>
+        <snapshotRepository>
+            <id>codemc-snapshots</id>
+            <url>https://repo.codemc.io/repository/maven-snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <id>codemc-releases</id>
+            <url>https://repo.codemc.io/repository/maven-releases/</url>
+        </repository>
+    </distributionManagement>
+
+    <licenses>
+        <license>
+            <name>The GNU General Public Licence version 3 (GPLv3)</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <modules>
+        <module>authme-core</module>
+        <module>authme-tools</module>
+        <module>authme-spigot-legacy</module>
+    </modules>
+
+    <properties>
+        <!-- Build cycle properties -->
+        <project.skipExtendedHashTests>false</project.skipExtendedHashTests>
+
+        <!-- Environment properties -->
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <revision>6.0.0-R1-SNAPSHOT</revision>
+        <module.java.version>17</module.java.version>
+        <maven.minimumVersion>3.8.8</maven.minimumVersion>
+
+        <!-- Versioning properties -->
+        <project.outputName>AuthMe</project.outputName>
+        <project.buildNumber>CUSTOM</project.buildNumber>
+        <project.versionCode>${project.version}-b${project.buildNumber}</project.versionCode>
+        <project.finalNameBase>${project.outputName}-${project.version}</project.finalNameBase>
+
+        <!-- Plugin description file properties -->
+        <pluginDescription.name>${project.outputName}</pluginDescription.name>
+        <pluginDescription.version>${project.versionCode}</pluginDescription.version>
+        <pluginDescription.main>fr.xephi.authme.AuthMe</pluginDescription.main>
+        <pluginDescription.authors>sgdc3, games647, Hex3l, krusic22</pluginDescription.authors>
+
+        <!-- Java libraries -->
+        <dependencies.injector.version>1.0</dependencies.injector.version>
+        <dependencies.string-similarity.version>1.0.0</dependencies.string-similarity.version>
+        <dependencies.geoip2.version>4.3.0</dependencies.geoip2.version>
+        <dependencies.javatar.version>2.5</dependencies.javatar.version>
+        <dependencies.commons-email.version>1.6.0</dependencies.commons-email.version>
+        <dependencies.hikaricp.version>7.0.2</dependencies.hikaricp.version>
+        <dependencies.slf4j.version>2.0.13</dependencies.slf4j.version>
+        <dependencies.datasourcecolumns.version>0.1.2</dependencies.datasourcecolumns.version>
+        <dependencies.mysql-connector-j.version>9.3.0</dependencies.mysql-connector-j.version>
+        <dependencies.mariadb-java-client.version>3.5.7</dependencies.mariadb-java-client.version>
+        <dependencies.postgresql.version>42.7.7</dependencies.postgresql.version>
+        <dependencies.pbkdf2.version>1.1.4</dependencies.pbkdf2.version>
+        <dependencies.argon2-jvm-nolibs.version>2.12</dependencies.argon2-jvm-nolibs.version>
+        <dependencies.bcrypt.version>0.10.2</dependencies.bcrypt.version>
+        <dependencies.googleauth.version>1.5.0</dependencies.googleauth.version>
+        <dependencies.configme.version>1.3.1</dependencies.configme.version>
+        <dependencies.junit-jupiter.version>6.0.3</dependencies.junit-jupiter.version>
+        <dependencies.mockito.version>5.23.0</dependencies.mockito.version>
+        <dependencies.mockito.javaagent>
+            ${settings.localRepository}/org/mockito/mockito-core/${dependencies.mockito.version}/mockito-core-${dependencies.mockito.version}.jar
+        </dependencies.mockito.javaagent>
+        <dependencies.velocity.version>3.4.0</dependencies.velocity.version>
+        <dependencies.bungeecord.version>1.19-R0.1-SNAPSHOT</dependencies.bungeecord.version>
+        <!-- Spigot -->
+        <dependencies.spigot.version>1.16.5-R0.1-SNAPSHOT</dependencies.spigot.version>
+        <dependencies.log4j-core.version>2.8.1</dependencies.log4j-core.version> <!-- version bundled 1.16.5 -->
+        <!-- Spigot libraries -->
+        <dependencies.bstats.version>3.1.0</dependencies.bstats.version>
+    </properties>
+
+    <!-- Jenkins profile -->
+    <profiles>
+        <!-- Set the buildNumber using the jenkins env. variable -->
+        <profile>
+            <id>jenkins</id>
+            <activation>
+                <property>
+                    <name>env.BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <properties>
+                <project.buildNumber>${env.BUILD_NUMBER}</project.buildNumber>
+            </properties>
+        </profile>
+        <profile>
+            <id>java21-modules</id>
+            <activation>
+                <jdk>[21,)</jdk>
+            </activation>
+            <modules>
+                <module>authme-bungee</module>
+                <module>authme-spigot-1.21</module>
+                <module>authme-paper-common</module>
+                <module>authme-paper</module>
+                <module>authme-folia</module>
+                <module>authme-velocity</module>
+            </modules>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <inherited>false</inherited>
+                        <configuration>
+                            <disableNoFonts>true</disableNoFonts>
+                            <source>21</source>
+                            <detectOfflineLinks>false</detectOfflineLinks>
+                            <javadocExecutable>${java.home}/bin</javadocExecutable>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>aggregate-apidocs</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>aggregate</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <!-- Skip long hash tests, reduce the test time of 20-30 seconds -->
+        <profile>
+            <id>skipLongHashTests</id>
+            <activation>
+                <property>
+                    <name>skipLongHashTests</name>
+                </property>
+            </activation>
+            <properties>
+                <project.skipExtendedHashTests>true</project.skipExtendedHashTests>
+            </properties>
+        </profile>
+        <!-- Skip javadoc generation for faster local build -->
+        <profile>
+            <id>skipJavadocGeneration</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <defaultGoal>clean package</defaultGoal>
+
+        <pluginManagement>
+            <plugins>
+                <!-- Enforce build environment -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.6.2</version>
+                    <executions>
+                        <execution>
+                            <id>enforce-environment</id>
+                            <goals>
+                                <goal>enforce</goal>
+                            </goals>
+                            <configuration>
+                                <rules>
+                                    <requireMavenVersion>
+                                        <version>${maven.minimumVersion}</version>
+                                    </requireMavenVersion>
+                                    <requireJavaVersion>
+                                        <version>[${module.java.version},)</version>
+                                    </requireJavaVersion>
+                                </rules>
+                                <fail>true</fail>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.4.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>3.3.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.15.0</version>
+                    <configuration>
+                        <source>${module.java.version}</source>
+                        <target>${module.java.version}</target>
+                        <release>${module.java.version}</release>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>0.8.14</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.4.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>3.12.0</version>
+                    <configuration>
+                        <disableNoFonts>true</disableNoFonts>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>3.3.1</version>
+                </plugin>
+                <!-- Shade plugin: version modules use this to produce deliverable jars -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>3.6.0</version>
+                    <configuration>
+                        <createDependencyReducedPom>false</createDependencyReducedPom>
+                        <shadedArtifactAttached>false</shadedArtifactAttached>
+                        <filters>
+                            <filter>
+                                <artifact>*:*</artifact>
+                                <excludes>
+                                    <exclude>META-INF/*.SF</exclude>
+                                    <exclude>META-INF/*.DSA</exclude>
+                                    <exclude>META-INF/*.RSA</exclude>
+                                    <exclude>META-INF/*.MF</exclude>
+                                    <exclude>META-INF/DEPENDENCIES</exclude>
+                                    <exclude>META-INF/**/module-info.class</exclude>
+                                </excludes>
+                            </filter>
+                        </filters>
+                        <transformers>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+                                <addHeader>false</addHeader>
+                            </transformer>
+                            <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                        </transformers>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>3.1.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>3.1.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.1.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.12.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.eluder.coveralls</groupId>
+                    <artifactId>coveralls-maven-plugin</artifactId>
+                    <version>4.3.0</version>
+                    <configuration>
+                        <failOnServiceError>false</failOnServiceError>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>javax.xml.bind</groupId>
+                            <artifactId>jaxb-api</artifactId>
+                            <version>2.3.1</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>flatten-maven-plugin</artifactId>
+                <version>1.7.3</version>
+                <configuration>
+                    <updatePomFile>true</updatePomFile>
+                    <flattenMode>resolveCiFriendliesOnly</flattenMode>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>flatten</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>flatten</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>flatten.clean</id>
+                        <phase>clean</phase>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-Xshare:off -javaagent:${dependencies.mockito.javaagent} -Dfile.encoding=${project.build.sourceEncoding} -Duser.language=en</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <!-- Apache snapshots repo -->
+        <repository>
+            <id>apache-snapshots</id>
+            <url>https://repository.apache.org/content/repositories/snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- SpigotAPI Repo -->
+        <repository>
+            <id>spigotmc-repo</id>
+            <url>https://hub.spigotmc.org/nexus/content/repositories/snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- CodeMC Repo (Contains many required libraries) -->
+        <repository>
+            <id>codemc-repo</id>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- EssentialsX Repo -->
+        <repository>
+            <id>essentialsx-repo</id>
+            <url>https://repo.essentialsx.net/releases/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- Multiverse Repo -->
+        <repository>
+            <id>onarandombox-repo-releases</id>
+            <url>https://repo.onarandombox.com/multiverse-releases</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>onarandombox-repo-snapshots</id>
+            <url>https://repo.onarandombox.com/multiverse-snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+
+        <!-- PaperMC Repo -->
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
+
+    <dependencyManagement>
+    <dependencies>
+        <!-- Java Libraries -->
+
+        <!-- Jalu Injector -->
+        <dependency>
+            <groupId>ch.jalu</groupId>
+            <artifactId>injector</artifactId>
+            <version>${dependencies.injector.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- String comparison library. Used for dynamic help system. -->
+        <dependency>
+            <groupId>net.ricecode</groupId>
+            <artifactId>string-similarity</artifactId>
+            <version>${dependencies.string-similarity.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- MaxMind GEO IP -->
+        <dependency>
+            <groupId>com.maxmind.geoip2</groupId>
+            <artifactId>geoip2</artifactId>
+            <version>${dependencies.geoip2.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Library for tar archives -->
+        <dependency>
+            <groupId>javatar</groupId>
+            <artifactId>javatar</artifactId>
+            <version>${dependencies.javatar.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Java Email Library -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-email</artifactId>
+            <version>${dependencies.commons-email.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Database Connection Pool -->
+        <dependency>
+            <groupId>com.zaxxer</groupId>
+            <artifactId>HikariCP</artifactId>
+            <version>${dependencies.hikaricp.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${dependencies.slf4j.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Data source columns -->
+        <dependency>
+            <groupId>ch.jalu</groupId>
+            <artifactId>datasourcecolumns</artifactId>
+            <version>${dependencies.datasourcecolumns.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- MySQL connector -->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>${dependencies.mysql-connector-j.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- MariaDB connector -->
+        <dependency>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>${dependencies.mariadb-java-client.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.checkerframework</groupId>
+                    <artifactId>checker-qual</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.google.errorprone</groupId>
+                    <artifactId>error_prone_annotations</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- PostgreSQL -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${dependencies.postgresql.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.checkerframework</groupId>
+                    <artifactId>checker-qual</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- PBKDF2 implementation -->
+        <dependency>
+            <groupId>de.rtner</groupId>
+            <artifactId>PBKDF2</artifactId>
+            <version>${dependencies.pbkdf2.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Argon2 implementation -->
+        <dependency>
+            <groupId>de.mkammerer</groupId>
+            <artifactId>argon2-jvm-nolibs</artifactId>
+            <version>${dependencies.argon2-jvm-nolibs.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- BCrypt implementation -->
+        <dependency>
+            <groupId>at.favre.lib</groupId>
+            <artifactId>bcrypt</artifactId>
+            <version>${dependencies.bcrypt.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- TOTP client -->
+        <dependency>
+            <groupId>com.warrenstrange</groupId>
+            <artifactId>googleauth</artifactId>
+            <version>${dependencies.googleauth.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- ConfigMe -->
+        <dependency>
+            <groupId>ch.jalu</groupId>
+            <artifactId>configme</artifactId>
+            <version>${dependencies.configme.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.yaml</groupId>
+                    <artifactId>snakeyaml</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <version>${dependencies.log4j-core.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Bukkit Libraries  -->
+
+        <!-- bStats metrics -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>${dependencies.bstats.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Plugin Hooks -->
+
+        <!-- PacketEvents -->
+        <dependency>
+            <groupId>com.github.retrooper</groupId>
+            <artifactId>packetevents-spigot</artifactId>
+            <version>2.12.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- LuckPerms plugin -->
+        <dependency>
+            <groupId>net.luckperms</groupId>
+            <artifactId>api</artifactId>
+            <version>5.5</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- PermissionsEx plugin -->
+        <dependency>
+            <groupId>ru.tehkode</groupId>
+            <artifactId>PermissionsEx</artifactId>
+            <version>1.23.5-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-dbcp</artifactId>
+                    <groupId>commons-dbcp</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>accounts-client</artifactId>
+                    <groupId>com.mojang</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- zPermissions plugin -->
+        <dependency>
+            <groupId>org.tyrannyofheaven.bukkit</groupId>
+            <artifactId>zPermissions</artifactId>
+            <version>1.4.3-SNAPSHOT</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.avaje</groupId>
+                    <artifactId>ebean</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Vault, https://dev.bukkit.org/bukkit-plugins/vault/ -->
+        <dependency>
+            <groupId>net.milkbowl.vault</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>craftbukkit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Multi World plugin, https://www.spigotmc.org/resources/multiverse-core.390/ -->
+        <dependency>
+            <groupId>com.onarandombox.multiversecore</groupId>
+            <artifactId>multiverse-core</artifactId>
+            <version>4.3.16</version>
+            <type>jar</type>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>bukkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bukkit</groupId>
+                    <artifactId>craftbukkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>AllPay</artifactId>
+                    <groupId>com.fernferret.allpay</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>Vault</artifactId>
+                    <groupId>net.milkbowl.vault</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>VaultAPI</artifactId>
+                    <groupId>net.milkbowl.vault</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>CommandHandler</artifactId>
+                    <groupId>com.pneumaticraft.commandhandler</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>SerializationConfig</artifactId>
+                    <groupId>me.main__.util</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>Logging</artifactId>
+                    <groupId>com.dumptruckman.minecraft</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>metrics</artifactId>
+                    <groupId>org.mcstats.bukkit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>buscript</artifactId>
+                    <groupId>com.dumptruckman.minecraft</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>junit</artifactId>
+                    <groupId>junit</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spigot-api</artifactId>
+                    <groupId>org.spigotmc</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jettison</artifactId>
+                    <groupId>org.codehaus.jettison</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- EssentialsX plugin -->
+        <dependency>
+            <groupId>net.essentialsx</groupId>
+            <artifactId>EssentialsX</artifactId>
+            <version>2.21.2</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>io.papermc</groupId>
+                    <artifactId>paperlib</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.bstats</groupId>
+                    <artifactId>bstats-bukkit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.essentialsx</groupId>
+                    <artifactId>BaseProviders</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.essentialsx</groupId>
+                    <artifactId>PaperProvider</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.essentialsx</groupId>
+                    <artifactId>NMSReflectionProvider</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.essentialsx</groupId>
+                    <artifactId>1_8Provider</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.essentialsx</groupId>
+                    <artifactId>1_12Provider</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.spigotmc</groupId>
+                    <artifactId>spigot-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.spongepowered</groupId>
+                    <artifactId>configurate-yaml</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.checkerframework</groupId>
+                    <artifactId>checker-qual</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Unit Testing Libraries -->
+
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+            <version>${dependencies.junit-jupiter.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest</artifactId>
+            <scope>test</scope>
+            <version>2.2</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+            <version>${dependencies.mockito.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+            <version>${dependencies.mockito.version}</version>
+        </dependency>
+
+        <!-- Required to mock the LuckPerms API-->
+        <dependency>
+            <groupId>org.checkerframework</groupId>
+            <artifactId>checker-qual</artifactId>
+            <version>4.0.0</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JDBC drivers for datasource integration tests -->
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>192.0.2.1</version>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.4.240</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Spigot API, https://www.spigotmc.org/ -->
+        <dependency>
+            <groupId>org.spigotmc</groupId>
+            <artifactId>spigot-api</artifactId>
+            <version>${dependencies.spigot.version}</version>
+            <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.joml</groupId>
+                    <artifactId>joml</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>net.md-5</groupId>
+                    <artifactId>bungeecord-chat</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Paper API -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.21.11-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- BungeeCord API -->
+        <dependency>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-api</artifactId>
+            <version>${dependencies.bungeecord.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Velocity API -->
+        <dependency>
+            <groupId>com.velocitypowered</groupId>
+            <artifactId>velocity-api</artifactId>
+            <version>${dependencies.velocity.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Folia API -->
+        <dependency>
+            <groupId>dev.folia</groupId>
+            <artifactId>folia-api</artifactId>
+            <version>1.21.11-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+
+    </dependencies>
+    </dependencyManagement>
+</project>

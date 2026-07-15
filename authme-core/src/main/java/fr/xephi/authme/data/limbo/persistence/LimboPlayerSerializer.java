@@ -1,0 +1,127 @@
+package fr.xephi.authme.data.limbo.persistence;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+import fr.xephi.authme.data.limbo.EnderPearlRestoreData;
+import fr.xephi.authme.data.limbo.LimboPlayer;
+import org.bukkit.Location;
+import org.bukkit.util.Vector;
+
+import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+/**
+ * Converts a LimboPlayer to a JsonElement.
+ */
+class LimboPlayerSerializer implements JsonSerializer<LimboPlayer> {
+
+    static final String LOCATION = "location";
+    static final String LOC_WORLD = "world";
+    static final String LOC_X = "x";
+    static final String LOC_Y = "y";
+    static final String LOC_Z = "z";
+    static final String LOC_YAW = "yaw";
+    static final String LOC_PITCH = "pitch";
+
+    static final String GROUPS = "groups";
+    static final String IS_OP = "operator";
+    static final String CAN_FLY = "can-fly";
+    static final String WALK_SPEED = "walk-speed";
+    static final String FLY_SPEED = "fly-speed";
+    static final String ENDER_PEARLS = "ender-pearls";
+    static final String PEARL_UUID = "uuid";
+    static final String VELOCITY = "velocity";
+    static final String VEL_X = "x";
+    static final String VEL_Y = "y";
+    static final String VEL_Z = "z";
+    static final String VEHICLE_UUID = "vehicle-uuid";
+    static final String VEHICLE_TYPE = "vehicle-type";
+
+    private static final Gson GSON = new Gson();
+
+
+    @Override
+    public JsonElement serialize(LimboPlayer limboPlayer, Type type, JsonSerializationContext context) {
+        JsonObject obj = new JsonObject();
+
+        Location loc = limboPlayer.getLocation();
+        if (loc != null && loc.getWorld() != null) {
+            JsonObject locationObject = new JsonObject();
+            locationObject.addProperty(LOC_WORLD, loc.getWorld().getName());
+            locationObject.addProperty(LOC_X, loc.getX());
+            locationObject.addProperty(LOC_Y, loc.getY());
+            locationObject.addProperty(LOC_Z, loc.getZ());
+            locationObject.addProperty(LOC_YAW, loc.getYaw());
+            locationObject.addProperty(LOC_PITCH, loc.getPitch());
+            obj.add(LOCATION, locationObject);
+        }
+
+        List<JsonObject> groups = limboPlayer.getGroups().stream().map(g -> {
+            JsonObject jsonGroup = new JsonObject();
+            jsonGroup.addProperty("groupName", g.getGroupName());
+            if (g.getContextMap() != null) {
+                jsonGroup.addProperty("contextMap", GSON.toJson(g.getContextMap()));
+            }
+            return jsonGroup;
+        }).collect(Collectors.toList());
+
+        JsonArray jsonGroups = new JsonArray();
+        groups.forEach(jsonGroups::add);
+        obj.add(GROUPS, jsonGroups);
+
+        obj.addProperty(IS_OP, limboPlayer.isOperator());
+        obj.addProperty(CAN_FLY, limboPlayer.isCanFly());
+        obj.addProperty(WALK_SPEED, limboPlayer.getWalkSpeed());
+        obj.addProperty(FLY_SPEED, limboPlayer.getFlySpeed());
+
+        Collection<EnderPearlRestoreData> pearls = limboPlayer.getEnderPearls();
+        if (!pearls.isEmpty()) {
+            JsonArray pearlArray = new JsonArray();
+            for (EnderPearlRestoreData pearl : pearls) {
+                JsonObject pearlObject = new JsonObject();
+                pearlObject.addProperty(PEARL_UUID, pearl.getUuid().toString());
+                if (pearl.getLocation() != null && pearl.getLocation().getWorld() != null) {
+                    pearlObject.add(LOCATION, serializeLocation(pearl.getLocation()));
+                }
+                if (pearl.getVelocity() != null) {
+                    pearlObject.add(VELOCITY, serializeVelocity(pearl.getVelocity()));
+                }
+                pearlArray.add(pearlObject);
+            }
+            obj.add(ENDER_PEARLS, pearlArray);
+        }
+
+        if (limboPlayer.getVehicleUuid() != null && limboPlayer.getVehicleType() != null) {
+            obj.addProperty(VEHICLE_UUID, limboPlayer.getVehicleUuid().toString());
+            obj.addProperty(VEHICLE_TYPE, limboPlayer.getVehicleType().name());
+        }
+
+        return obj;
+    }
+
+    static JsonObject serializeLocation(Location loc) {
+        JsonObject locationObject = new JsonObject();
+        locationObject.addProperty(LOC_WORLD, loc.getWorld().getName());
+        locationObject.addProperty(LOC_X, loc.getX());
+        locationObject.addProperty(LOC_Y, loc.getY());
+        locationObject.addProperty(LOC_Z, loc.getZ());
+        locationObject.addProperty(LOC_YAW, loc.getYaw());
+        locationObject.addProperty(LOC_PITCH, loc.getPitch());
+        return locationObject;
+    }
+
+    private static JsonObject serializeVelocity(Vector velocity) {
+        JsonObject velocityObject = new JsonObject();
+        velocityObject.addProperty(VEL_X, velocity.getX());
+        velocityObject.addProperty(VEL_Y, velocity.getY());
+        velocityObject.addProperty(VEL_Z, velocity.getZ());
+        return velocityObject;
+    }
+}

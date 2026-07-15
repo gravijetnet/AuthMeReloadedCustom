@@ -1,0 +1,84 @@
+package fr.xephi.authme.util;
+
+import fr.xephi.authme.TestHelper;
+import org.bukkit.entity.Player;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+
+/**
+ * Test for {@link PlayerUtils}.
+ */
+public class PlayerUtilsTest {
+
+    @BeforeAll
+    public static void setAuthmeInstance() {
+        TestHelper.setupLogger();
+    }
+
+    @Test
+    public void shouldGetPlayerIp() {
+        // given
+        Player player = mock(Player.class);
+        String ip = "124.86.248.62";
+        TestHelper.mockIpAddressToPlayer(player, ip);
+
+        // when
+        String result = PlayerUtils.getPlayerIp(player);
+
+        // then
+        assertThat(result, equalTo(ip));
+    }
+
+    @Test
+    public void shouldReturnCurrentNameIfNoResolverIsSet() {
+        // given
+        Player player = mock(Player.class);
+        given(player.getName()).willReturn("Bobby");
+
+        // when / then
+        assertThat(PlayerUtils.getName(player), equalTo("Bobby"));
+    }
+
+    @Test
+    public void shouldResolveAccountNameOfDisguisedPlayer() {
+        // given
+        Player player = mock(Player.class);
+        PlayerUtils.setNameResolver(pl -> "Bobby");
+
+        // when
+        String result = PlayerUtils.getName(player);
+
+        // then
+        try {
+            assertThat(result, equalTo("Bobby"));
+            verify(player, never()).getName();
+        } finally {
+            PlayerUtils.setNameResolver(null);
+        }
+    }
+
+    @Test
+    public void shouldCheckIfIsNpc() {
+        // given
+        Player player1 = mock(Player.class);
+        given(player1.hasMetadata("NPC")).willReturn(false);
+        Player player2 = mock(Player.class);
+        given(player2.hasMetadata("NPC")).willReturn(true);
+
+        // when
+        boolean result1 = PlayerUtils.isNpc(player1);
+        boolean result2 = PlayerUtils.isNpc(player2);
+
+        // then
+        assertThat(result1, equalTo(false));
+        assertThat(result2, equalTo(true));
+    }
+}
+

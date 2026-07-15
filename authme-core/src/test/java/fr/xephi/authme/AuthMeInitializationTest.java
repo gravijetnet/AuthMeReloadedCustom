@@ -1,0 +1,199 @@
+package fr.xephi.authme;
+
+import org.mockito.quality.Strictness;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.extension.ExtendWith;
+import ch.jalu.configme.resource.PropertyReader;
+import ch.jalu.configme.resource.PropertyResource;
+import ch.jalu.injector.Injector;
+import ch.jalu.injector.InjectorBuilder;
+import com.google.common.io.Files;
+import fr.xephi.authme.api.v3.AuthMeApi;
+import fr.xephi.authme.command.CommandHandler;
+import fr.xephi.authme.datasource.DataSource;
+import fr.xephi.authme.initialization.DataFolder;
+import fr.xephi.authme.listener.BlockListener;
+import fr.xephi.authme.listener.LegacyPlayerLoginListener;
+import fr.xephi.authme.listener.LegacyPlayerSpawnLocationListener;
+import fr.xephi.authme.listener.PlayerListener;
+import fr.xephi.authme.platform.ChatAdapter;
+import fr.xephi.authme.platform.CommandRegistrationAdapter;
+import fr.xephi.authme.platform.DialogAdapter;
+import fr.xephi.authme.platform.EventRegistrationAdapter;
+import fr.xephi.authme.platform.PacketInterceptionAdapter;
+import fr.xephi.authme.platform.PlatformAdapter;
+import fr.xephi.authme.platform.SchedulingAdapter;
+import fr.xephi.authme.platform.TeleportAdapter;
+import fr.xephi.authme.permission.PermissionsManager;
+import fr.xephi.authme.process.Management;
+import fr.xephi.authme.process.login.ProcessSyncPlayerLogin;
+import fr.xephi.authme.security.PasswordSecurity;
+import fr.xephi.authme.service.BukkitService;
+import fr.xephi.authme.service.bungeecord.BungeeReceiver;
+import fr.xephi.authme.service.bungeecord.BungeeSender;
+import fr.xephi.authme.settings.Settings;
+import fr.xephi.authme.task.purge.PurgeService;
+import org.bukkit.Bukkit;
+import org.bukkit.Server;
+import org.bukkit.event.Listener;
+import org.bukkit.plugin.PluginDescriptionFile;
+import org.bukkit.plugin.PluginManager;
+import org.bukkit.plugin.java.JavaPluginLoader;
+import org.bukkit.scheduler.BukkitScheduler;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import fr.xephi.authme.TempFolder;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
+
+import static fr.xephi.authme.settings.properties.AuthMeSettingsRetriever.buildConfigurationData;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+/**
+ * Integration test verifying that all services can be initialized in {@link AuthMe}
+ * with the {@link Injector}.
+ */
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.WARN)
+public class AuthMeInitializationTest {
+
+    @Mock
+    private Server server;
+
+    @Mock
+    private PluginManager pluginManager;
+
+    private AuthMe authMe;
+    private File dataFolder;
+    public TempFolder temporaryFolder = new TempFolder();
+
+    @BeforeEach
+    public void initAuthMe() throws IOException {
+        dataFolder = temporaryFolder.newFolder();
+        File settingsFile = new File(dataFolder, "config.yml");
+        given(server.getLogger()).willReturn(Logger.getAnonymousLogger());
+        JavaPluginLoader pluginLoader = new JavaPluginLoader(server);
+        Files.copy(TestHelper.getJarFile(TestHelper.PROJECT_ROOT + "config.test.yml"), settingsFile);
+
+        // Mock / wire various Bukkit components
+        ReflectionTestUtils.setField(Bukkit.class, null, "server", server);
+
+        // PluginDescriptionFile is final: need to create a sample one
+        PluginDescriptionFile descriptionFile = new PluginDescriptionFile(
+            "AuthMe", "N/A", AuthMe.class.getCanonicalName());
+
+        // Initialize AuthMe
+        authMe = new AuthMe(pluginLoader, descriptionFile, dataFolder, null);
+    }
+
+    @Test
+    public void shouldInitializeAllServices() {
+        // given
+        PropertyReader reader = mock(PropertyReader.class);
+        PropertyResource resource = mock(PropertyResource.class);
+        given(resource.createReader()).willReturn(reader);
+        Settings settings = new Settings(dataFolder, resource, null, buildConfigurationData());
+
+        TestHelper.setupLogger();
+
+        Injector injector = new InjectorBuilder()
+            .addDefaultHandlers("fr.xephi.authme")
+            .create();
+        given(server.getPluginManager()).willReturn(pluginManager);
+        injector.provide(DataFolder.class, dataFolder);
+        injector.register(Server.class, server);
+        injector.register(PluginManager.class, pluginManager);
+
+        injector.register(AuthMe.class, authMe);
+        injector.register(Settings.class, settings);
+        injector.register(DataSource.class, mock(DataSource.class));
+        injector.register(BukkitService.class, mock(BukkitService.class));
+        PlatformAdapter platformAdapter = mock(PlatformAdapter.class);
+        given(platformAdapter.getListeners()).willReturn(EventRegistrationAdapter.getCommonListeners());
+        injector.register(PlatformAdapter.class, platformAdapter);
+        injector.register(TeleportAdapter.class, platformAdapter);
+        injector.register(ChatAdapter.class, platformAdapter);
+        injector.register(EventRegistrationAdapter.class, platformAdapter);
+        injector.register(SchedulingAdapter.class, platformAdapter);
+        injector.register(DialogAdapter.class, platformAdapter);
+        injector.register(CommandRegistrationAdapter.class, platformAdapter);
+        injector.register(PacketInterceptionAdapter.class, platformAdapter);
+
+        // when
+        authMe.instantiateServices(injector);
+        authMe.registerEventListeners(injector);
+
+        // then
+        // Take a few samples and ensure that they are not null
+        assertThat(injector.getIfAvailable(AuthMeApi.class), not(nullValue()));
+        assertThat(injector.getIfAvailable(BlockListener.class), not(nullValue()));
+        assertThat(injector.getIfAvailable(BungeeReceiver.class), not(nullValue()));
+        assertThat(injector.getIfAvailable(BungeeSender.class), not(nullValue()));
+        assertThat(injector.getIfAvailable(CommandHandler.class), not(nullValue()));
+        assertThat(injector.getIfAvailable(Management.class), not(nullValue()));
+        assertThat(injector.getIfAvailable(PasswordSecurity.class), not(nullValue()));
+        assertThat(injector.getIfAvailable(PermissionsManager.class), not(nullValue()));
+        assertThat(injector.getIfAvailable(ProcessSyncPlayerLogin.class), not(nullValue()));
+        assertThat(injector.getIfAvailable(PurgeService.class), not(nullValue()));
+    }
+
+    @Test
+    public void shouldRegisterPlatformListenersFromAdapter() {
+        // given
+        Injector injector = mock(Injector.class);
+        PlatformAdapter platformAdapter = mock(PlatformAdapter.class);
+        PlayerListener playerListener = mock(PlayerListener.class);
+        LegacyPlayerLoginListener legacyLoginListener = new LegacyPlayerLoginListener();
+        LegacyPlayerSpawnLocationListener legacySpawnListener = new LegacyPlayerSpawnLocationListener();
+        List<Class<? extends Listener>> listeners = List.of(
+            PlayerListener.class,
+            LegacyPlayerLoginListener.class,
+            LegacyPlayerSpawnLocationListener.class);
+        given(server.getPluginManager()).willReturn(pluginManager);
+        given(injector.getSingleton(EventRegistrationAdapter.class)).willReturn(platformAdapter);
+        given(platformAdapter.getListeners()).willReturn(listeners);
+        given(injector.getSingleton(PlayerListener.class)).willReturn(playerListener);
+        given(injector.getSingleton(LegacyPlayerLoginListener.class)).willReturn(legacyLoginListener);
+        given(injector.getSingleton(LegacyPlayerSpawnLocationListener.class)).willReturn(legacySpawnListener);
+
+        // when
+        authMe.registerEventListeners(injector);
+
+        // then
+        verify(pluginManager).registerEvents(playerListener, authMe);
+        verify(pluginManager).registerEvents(legacyLoginListener, authMe);
+        verify(pluginManager).registerEvents(legacySpawnListener, authMe);
+    }
+
+    @Test
+    public void shouldHandlePrematureShutdownGracefully() {
+        // given
+        BukkitScheduler scheduler = mock(BukkitScheduler.class);
+        given(server.getScheduler()).willReturn(scheduler);
+
+        // Make sure ConsoleLogger has no logger reference since that may happen on unexpected stops
+        ReflectionTestUtils.setField(ConsoleLogger.class, null, "logger", null);
+
+        // when
+        authMe.onDisable();
+
+        // then - no exceptions
+        verify(scheduler).getActiveWorkers(); // via TaskCloser
+    }
+}
+
+

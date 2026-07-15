@@ -1,0 +1,102 @@
+package fr.xephi.authme.platform;
+
+import fr.xephi.authme.listener.BlockListener;
+import fr.xephi.authme.listener.EntityListener;
+import fr.xephi.authme.listener.LegacyPlayerLoginListener;
+import fr.xephi.authme.listener.LegacyPlayerSpawnLocationListener;
+import fr.xephi.authme.listener.PlayerListener;
+import fr.xephi.authme.listener.PlayerSignOpenListener;
+import fr.xephi.authme.listener.ServerListener;
+import fr.xephi.authme.process.register.RegisterSecondaryArgument;
+import fr.xephi.authme.process.register.RegistrationType;
+import net.md_5.bungee.api.dialog.MultiActionDialog;
+import org.bukkit.entity.Player;
+import org.bukkit.event.Listener;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+
+public class SpigotPlatformAdapterTest {
+
+    private final SpigotPlatformAdapter adapter = new SpigotPlatformAdapter();
+    private final DialogWindowSpec dialog = new DialogWindowSpec("Title",
+        List.of(new DialogInputSpec("password", "Password", 100)),
+        "Submit",
+        "Cancel",
+        false,
+        false);
+
+    @Test
+    public void getPlatformNameReturnsExpectedValue() {
+        assertThat(adapter.getPlatformName(), is("spigot-1.21"));
+    }
+
+    @Test
+    public void getCompatibilityErrorReturnsNullForCompatibleClasspath() {
+        assertThat(adapter.getCompatibilityError(), is((String) null));
+    }
+
+    @Test
+    public void isDialogSupportedReturnsTrueWhenApiIsOnClasspath() {
+        // The BungeeCord dialog API is a test dependency, so DIALOG_AVAILABLE is true
+        assertThat(adapter.isDialogSupported(), is(true));
+    }
+
+    @Test
+    public void getListenersContainsCoreAndSpigotListeners() {
+        List<Class<? extends Listener>> listeners = adapter.getListeners();
+
+        assertThat(listeners, containsInAnyOrder(
+            PlayerListener.class,
+            BlockListener.class,
+            EntityListener.class,
+            ServerListener.class,
+            LegacyPlayerLoginListener.class,
+            LegacyPlayerSpawnLocationListener.class,
+            PlayerSignOpenListener.class));
+    }
+
+    @Test
+    public void showLoginDialogDelegatesToPlayer() {
+        // given
+        Player player = mock(Player.class);
+
+        // when
+        adapter.showLoginDialog(player, dialog);
+
+        // then
+        verify(player).showDialog(any(MultiActionDialog.class));
+    }
+
+    @Test
+    public void showTotpDialogDelegatesToPlayer() {
+        // given
+        Player player = mock(Player.class);
+
+        // when
+        adapter.showTotpDialog(player, dialog);
+
+        // then
+        verify(player).showDialog(any(MultiActionDialog.class));
+    }
+
+    @Test
+    public void showRegisterDialogDelegatesToPlayer() {
+        // given
+        Player player = mock(Player.class);
+
+        // when
+        adapter.showRegisterDialog(player, RegistrationType.PASSWORD, RegisterSecondaryArgument.NONE, dialog);
+
+        // then
+        verify(player).showDialog(any(MultiActionDialog.class));
+    }
+}
+
