@@ -279,6 +279,7 @@ public class LimboService {
      *
      * @param player the player whose entities should be restored
      */
+    @SuppressWarnings("deprecation") // Entity#setPassenger: kept for 1.8.8 compatibility (addPassenger is 1.11+)
     public void restoreEntities(Player player) {
         String name = PlayerUtils.getName(player).toLowerCase(Locale.ROOT);
         LimboPlayer limbo = entries.get(name);
@@ -312,7 +313,7 @@ public class LimboService {
                     pearlRestored++;
                 } else if (!vehicleDone
                         && vehicleUuid.equals(entity.getUniqueId())) {
-                    entity.addPassenger(player);
+                    entity.setPassenger(player);
                     vehicleDone = true;
                 }
                 if (pendingPearls.isEmpty() && vehicleDone) {

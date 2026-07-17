@@ -86,6 +86,12 @@ email:
     add_email_request: '&3Bitte hinterlege deine E-Mail-Adresse: /email add <deineEmail> <emailBestätigen>'
     usage_email_add: '&cBenutze: /email add <email> <bestätigeEmail>'
     usage_email_change: '&cBenutze: /email change <alteEmail> <neueEmail>'
+    usage_email_confirm: '&cBenutze: /email confirm <code>'
+    confirmation:
+        code_sent: '&3Ein Bestätigungscode wurde an &f%email&3 gesendet. Gib ihn innerhalb von %minutes Minuten mit &f/email confirm <code>&3 ein.'
+        no_pending: '&cEs wartet keine E-Mail-Adresse auf deine Bestätigung. Hinterlege eine mit /email add <deineEmail> <emailBestätigen>.'
+        incorrect_code: '&cFalscher Bestätigungscode! Du hast noch %count Versuche.'
+        tries_exceeded: '&cZu viele falsche Codes. Deine E-Mail-Adresse wurde verworfen — beginne neu mit /email add <deineEmail> <emailBestätigen>.'
     new_email_invalid: '&cDie neue E-Mail ist ungültig!'
     old_email_invalid: '&cDie alte E-Mail ist ungültig!'
     invalid: '&cUngültige E-Mail!'

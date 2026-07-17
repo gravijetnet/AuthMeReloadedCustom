@@ -30,6 +30,10 @@ This guide covers configuring AuthMe in a BungeeCord or Velocity network. The se
 
 Auth state flows from backend → proxy (login/logout messages) and from proxy → backend (perform.login after server switch).
 
+The backend pushes a `login` message the moment a player logs in, but the proxy can miss it — for example when another plugin (such as FastLogin) logs the player in before the proxy knows about their connection. The proxy therefore also asks: when a player connects to an auth server and the proxy has no auth state for them, it sends a `status.request`, and the backend answers with `login` only if that player is currently logged in there.
+
+A `status.request` needs no HMAC because it cannot change anything. The backend reports the result of its own `PlayerCache` check and takes the reported name from the looked-up player, not from the message — so it can only ever confirm a login that already happened. `perform.login`, the one message that *does* log a player in, stays HMAC-signed.
+
 ---
 
 ## Installation

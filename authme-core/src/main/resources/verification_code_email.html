@@ -1,20 +1,101 @@
-<h1>
-    Dear <playername />,
-</h1>
+<!-- authme-template-version: 3 -->
+<!--
+    AuthMe verification code email.
+    Available placeholders: <playername /> <servername /> <generatedcode /> <minutesvalid />
 
-<p>
-    This is your temporary verification code for the server <servername />:
-</p>
-<p>
-    <generatedcode />
-</p>
+    Keep the version marker on the first line. AuthMe replaces this file with the bundled
+    template when the marker is missing or older than the one it ships, and keeps a backup
+    of your version next to it. Bump the number yourself to keep your own edits.
 
-<p>
-    This code will be valid for the next <minutesvalid /> mins!<br />
-    Use the command
-    /verification <generatedcode />
-    to complete the verification process.
-</p>
-<p>
-    See you on <servername />!
-</p>
+    Design notes: this is a Minecraft GUI. The grey panel, its bevels, the inset item slot,
+    the chat text field and the tiled dirt background all use the in-game colours. Gmail and
+    Outlook strip <style> blocks, so every style that matters is inlined; the <style> block
+    below only adds the pixel font where the client supports webfonts.
+-->
+<style>
+    /* Monocraft is an OFL-licensed Minecraft-style typeface (github.com/IdreesInc/Monocraft).
+       It contains no Mojang assets. Clients that strip @font-face fall back to the
+       monospace stack inlined on every element below. */
+    @font-face {
+        font-family: 'Monocraft';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: local('Monocraft'), local('Minecraft'),
+             url('https://cdn.jsdelivr.net/gh/IdreesInc/Monocraft@4.2.1/dist/Monocraft-ttf/Monocraft.ttf') format('truetype');
+    }
+</style>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" background="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAA90lEQVR42k2S2wrCQAxE8wVCxeINiyAVWnzx/3/OE84yCOuayySZzLbe9+P2OC3z4bve9mX+PM8cbCKvy0R2vU64GMSJFL8UaIDgtpIIB7QR7C6gcfo5hwRlHAyn6QIoHH1ykkk/WnAciMFNr7KrlAw5GjvtHUiqJ6STOxCVknOssT0G4DIkn7RUHFygbq9WpIo/WWZdN8lYSZpqlQh5CEV+W0pPJrjcvYPQ/9XtrdbccpPSmOBjhxhG3sQHDtsuUCVDQsVpRxLjrVKYRCUqnSAloZIcsiYnDVm5qLigx7cUJspCmeksgCG98WnkRRVRldTXSr88YT8AiFjEtXTfbAAAAABJRU5ErkJggg==" style="border-collapse:collapse;background-color:#2C2018;background-image:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAIAAACQkWg2AAAA90lEQVR42k2S2wrCQAxE8wVCxeINiyAVWnzx/3/OE84yCOuayySZzLbe9+P2OC3z4bve9mX+PM8cbCKvy0R2vU64GMSJFL8UaIDgtpIIB7QR7C6gcfo5hwRlHAyn6QIoHH1ykkk/WnAciMFNr7KrlAw5GjvtHUiqJ6STOxCVknOssT0G4DIkn7RUHFygbq9WpIo/WWZdN8lYSZpqlQh5CEV+W0pPJrjcvYPQ/9XtrdbccpPSmOBjhxhG3sQHDtsuUCVDQsVpRxLjrVKYRCUqnSAloZIcsiYnDVm5qLigx7cUJspCmeksgCG98WnkRRVRldTXSr88YT8AiFjEtXTfbAAAAABJRU5ErkJggg==');background-repeat:repeat;">
+    <tr>
+        <td align="center" style="padding:32px 12px;">
+
+            <!-- GUI panel: 2px black outline, then the beveled inventory background -->
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="540" style="border-collapse:collapse;background-color:#000000;max-width:540px;">
+                <tr>
+                    <td style="padding:2px;">
+
+                        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="border-collapse:collapse;background-color:#C6C6C6;border-top:2px solid #FFFFFF;border-left:2px solid #FFFFFF;border-right:2px solid #555555;border-bottom:2px solid #555555;">
+                            <tr>
+                                <td style="padding:22px 24px 24px 24px;font-family:'Monocraft','Minecraft',Consolas,'Courier New',monospace;font-size:13px;color:#404040;">
+
+                                    <!-- GUI label: dark grey, no shadow, exactly like an inventory title -->
+                                    <div style="font-size:15px;letter-spacing:1px;text-transform:uppercase;color:#404040;">Verification Code</div>
+
+                                    <!-- Engraved groove -->
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:12px 0 20px 0;">
+                                        <tr><td style="height:2px;background-color:#8B8B8B;font-size:0;line-height:0;">&nbsp;</td></tr>
+                                        <tr><td style="height:2px;background-color:#FFFFFF;font-size:0;line-height:0;">&nbsp;</td></tr>
+                                    </table>
+
+                                    <div style="line-height:1.9;">
+                                        Hello <playername />,<br />
+                                        this is your verification code for <servername />.
+                                    </div>
+
+                                    <!-- Item slot: inset bevel (dark top/left, light bottom/right) -->
+                                    <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:22px auto;">
+                                        <tr>
+                                            <td align="center" style="background-color:#8B8B8B;border-top:3px solid #373737;border-left:3px solid #373737;border-right:3px solid #FFFFFF;border-bottom:3px solid #FFFFFF;padding:16px 32px;font-family:'Monocraft','Minecraft',Consolas,'Courier New',monospace;font-size:30px;letter-spacing:9px;color:#FFFFFF;text-shadow:2px 2px 0 #3F3F3F;white-space:nowrap;">
+                                                <generatedcode />
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <div style="line-height:1.9;">
+                                        Type this command in the chat to finish the verification:
+                                    </div>
+
+                                    <!-- Chat text field: black background, light grey border, shadowed white text -->
+                                    <table role="presentation" align="center" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:14px auto 22px auto;">
+                                        <tr>
+                                            <td style="background-color:#000000;border:2px solid #A0A0A0;padding:11px 18px;font-family:'Monocraft','Minecraft',Consolas,'Courier New',monospace;font-size:14px;color:#FFFFFF;text-shadow:2px 2px 0 #3F3F3F;white-space:nowrap;">
+                                                /verification <generatedcode />
+                                            </td>
+                                        </tr>
+                                    </table>
+
+                                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;margin:22px 0 14px 0;">
+                                        <tr><td style="height:2px;background-color:#8B8B8B;font-size:0;line-height:0;">&nbsp;</td></tr>
+                                        <tr><td style="height:2px;background-color:#FFFFFF;font-size:0;line-height:0;">&nbsp;</td></tr>
+                                    </table>
+
+                                    <div style="font-size:12px;line-height:1.8;color:#6B6B6B;">
+                                        The code expires in <minutesvalid /> minutes.<br />
+                                        If you did not request it, you can ignore this email &mdash; nothing changes.
+                                    </div>
+
+                                </td>
+                            </tr>
+                        </table>
+
+                    </td>
+                </tr>
+            </table>
+
+            <div style="font-family:'Monocraft','Minecraft',Consolas,'Courier New',monospace;font-size:11px;color:#A8A8A8;text-shadow:2px 2px 0 #2A2A2A;padding-top:16px;">
+                <servername />
+            </div>
+
+        </td>
+    </tr>
+</table>

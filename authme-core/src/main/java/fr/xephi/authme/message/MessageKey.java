@@ -167,6 +167,21 @@ public enum MessageKey {
     /** Invalid email address, try again! */
     INVALID_EMAIL("email.invalid"),
 
+    /** Usage: /email confirm &lt;code&gt; */
+    USAGE_CONFIRM_EMAIL("email.usage_email_confirm"),
+
+    /** A confirmation code has been sent to %email. Confirm it with /email confirm &lt;code&gt;. */
+    EMAIL_CONFIRMATION_SENT("email.confirmation.code_sent", "%email", "%minutes"),
+
+    /** You have no email address waiting to be confirmed. */
+    EMAIL_CONFIRMATION_NO_PENDING("email.confirmation.no_pending"),
+
+    /** Incorrect confirmation code! You have %count tries remaining. */
+    EMAIL_CONFIRMATION_INCORRECT_CODE("email.confirmation.incorrect_code", "%count"),
+
+    /** Too many wrong codes; the pending email address was discarded. */
+    EMAIL_CONFIRMATION_TRIES_EXCEEDED("email.confirmation.tries_exceeded"),
+
     /** Email address successfully added to your account! */
     EMAIL_ADDED_SUCCESS("email.added"),
 

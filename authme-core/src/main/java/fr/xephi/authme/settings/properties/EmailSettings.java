@@ -57,6 +57,23 @@ public final class EmailSettings implements SettingsHolder {
     public static final Property<Integer> MAX_REG_PER_EMAIL =
         newProperty("Email.maxRegPerEmail", 1);
 
+    @Comment({"Make players confirm an email address before it is saved?",
+              "When enabled, /email add and /email change send a code to the given address and",
+              "only store it once the player enters it with /email confirm <code>.",
+              "Has no effect while the mail settings above are incomplete: AuthMe cannot send the",
+              "code then and saves the address right away."})
+    public static final Property<Boolean> REQUIRE_CONFIRMATION =
+        newProperty("Email.requireConfirmation", true);
+
+    @Comment("Minutes an email confirmation code stays valid")
+    public static final Property<Integer> CONFIRMATION_CODE_EXPIRATION_MINUTES =
+        newProperty("Email.confirmationCodeExpirationMinutes", 15);
+
+    @Comment({"How many wrong confirmation codes a player may enter before the pending address is",
+              "discarded and they have to start over with /email add"})
+    public static final Property<Integer> CONFIRMATION_MAX_TRIES =
+        newProperty("Email.confirmationMaxTries", 3);
+
     @Comment("Recall players to add an email?")
     public static final Property<Boolean> RECALL_PLAYERS =
         newProperty("Email.recallPlayers", false);

@@ -51,10 +51,10 @@
             <version>1</version>
             <scope>provided</scope>
         </dependency>
+        <!-- configme is needed to compile against Settings API (bundled via authme-core) -->
         <dependency>
             <groupId>ch.jalu</groupId>
             <artifactId>configme</artifactId>
-            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

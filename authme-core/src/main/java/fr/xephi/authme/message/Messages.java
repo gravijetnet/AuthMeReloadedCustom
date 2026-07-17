@@ -140,7 +140,7 @@ public class Messages {
         if (sender instanceof Player player) {
             displayName = player.getDisplayName();
             if (settings != null && settings.getProperty(PluginSettings.PER_PLAYER_LOCALE)) {
-                String language = PlayerLocaleResolver.toLanguageCode(player.getLocale());
+                String language = PlayerLocaleResolver.toLanguageCode(getPlayerLocale(player));
                 message = messagesFileHandler.getMessage(key.getKey(), language);
             } else {
                 message = messagesFileHandler.getMessage(key.getKey());
@@ -154,6 +154,27 @@ public class Messages {
                 .replace(NEWLINE_TAG, "\n")
                 .replace(USERNAME_TAG, sender.getName())
                 .replace(DISPLAYNAME_TAG, displayName);
+    }
+
+    /**
+     * Returns the client locale of the given player in a version-independent way. Bukkit's
+     * {@link Player#getLocale()} exists since Minecraft 1.12; on older servers (e.g. 1.8.x) the
+     * same value is only exposed via {@code Player.Spigot#getLocale()}, reached reflectively here.
+     *
+     * @param player the player whose locale should be resolved
+     * @return the Minecraft locale string (e.g. {@code en_us}), or null if it cannot be determined
+     */
+    private static String getPlayerLocale(Player player) {
+        try {
+            return player.getLocale();
+        } catch (NoSuchMethodError preV1_12Server) {
+            try {
+                Object spigot = player.spigot();
+                return (String) Player.Spigot.class.getMethod("getLocale").invoke(spigot);
+            } catch (ReflectiveOperationException | RuntimeException ex) {
+                return null;
+            }
+        }
     }
 
     /**

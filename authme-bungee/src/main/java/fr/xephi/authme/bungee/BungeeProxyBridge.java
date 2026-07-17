@@ -37,6 +37,7 @@ public final class BungeeProxyBridge implements Listener {
     private static final String PERFORM_LOGIN_MESSAGE = "perform.login";
     private static final String PERFORM_LOGIN_ACK_MESSAGE = "perform.login.ack";
     private static final String PROXY_STARTED_MESSAGE = "proxy.started";
+    private static final String STATUS_REQUEST_MESSAGE = "status.request";
     private static final String PROXY_IDENTITY = "bungee";
     private static final int MAX_RETRIES = 3;
 
@@ -167,6 +168,14 @@ public final class BungeeProxyBridge implements Listener {
         Server currentServer = player.getServer();
         if (currentServer != null) {
             sendProxyStartedHandshakeIfPending(currentServer.getInfo());
+        }
+
+        // The proxy only learns about logins from the backend's push, and that push is easy to miss: the player
+        // may have been logged in before this proxy came up, or before we knew about their connection. Ask the
+        // auth server for the current state whenever we don't know the player.
+        if (currentServer != null && configuration.isAuthServer(currentServer.getInfo())
+            && !authenticationStore.isAuthenticated(player)) {
+            scheduleStatusRequest(normalizeName(player.getName()), currentServer.getInfo());
         }
 
         if (!configuration.autoLoginEnabled()) {
@@ -300,6 +309,45 @@ public final class BungeeProxyBridge implements Listener {
             logger.info("Failed to send deferred proxy.started handshake to '" + serverName + "'; scheduling retry");
             retryScheduler.schedule(() -> sendProxyStartedHandshakeIfPending(server), 1, TimeUnit.SECONDS);
         }
+    }
+
+    /**
+     * Asks an auth server for a player's current authentication state, shortly after they connect so that the
+     * backend has had time to finish its own join handling (session resume, FastLogin premium auto-login, ...).
+     *
+     * @param normalizedName the lowercase name of the player to ask about
+     * @param server the auth server the player connected to
+     */
+    private void scheduleStatusRequest(String normalizedName, ServerInfo server) {
+        retryScheduler.schedule(() -> sendStatusRequest(normalizedName, server, 0), 1, TimeUnit.SECONDS);
+    }
+
+    private void sendStatusRequest(String normalizedName, ServerInfo server, int attempt) {
+        if (proxyServer.getPlayer(normalizedName) == null) {
+            return;
+        }
+        if (authenticationStore.isAuthenticated(normalizedName)) {
+            // The backend's login message arrived in the meantime — nothing to ask about.
+            return;
+        }
+
+        if (!server.getPlayers().isEmpty()) {
+            server.sendData(AUTHME_CHANNEL, createStatusRequestMessage(normalizedName), false);
+            return;
+        }
+
+        int nextAttempt = attempt + 1;
+        if (nextAttempt >= MAX_RETRIES) {
+            return;
+        }
+        retryScheduler.schedule(() -> sendStatusRequest(normalizedName, server, nextAttempt), 1, TimeUnit.SECONDS);
+    }
+
+    private byte[] createStatusRequestMessage(String normalizedName) {
+        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+        output.writeUTF(STATUS_REQUEST_MESSAGE);
+        output.writeUTF(normalizedName);
+        return output.toByteArray();
     }
 
     private void initiatePendingLogin(String normalizedName) {

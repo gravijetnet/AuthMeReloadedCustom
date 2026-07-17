@@ -1,14 +1,11 @@
 package fr.xephi.authme.process.email;
 
-import fr.xephi.authme.ConsoleLogger;
+import fr.xephi.authme.data.EmailConfirmationManager;
 import fr.xephi.authme.data.auth.PlayerAuth;
 import fr.xephi.authme.data.auth.PlayerCache;
 import fr.xephi.authme.datasource.DataSource;
-import fr.xephi.authme.events.EmailChangedEvent;
-import fr.xephi.authme.output.ConsoleLoggerFactory;
 import fr.xephi.authme.message.MessageKey;
 import fr.xephi.authme.process.AsynchronousProcess;
-import fr.xephi.authme.service.BukkitService;
 import fr.xephi.authme.service.CommonService;
 import fr.xephi.authme.service.ValidationService;
 import fr.xephi.authme.util.PlayerUtils;
@@ -21,8 +18,6 @@ import java.util.Locale;
  * Async task for changing the email.
  */
 public class AsyncChangeEmail implements AsynchronousProcess {
-    
-    private final ConsoleLogger logger = ConsoleLoggerFactory.get(AsyncChangeEmail.class);
 
     @Inject
     private CommonService service;
@@ -37,7 +32,10 @@ public class AsyncChangeEmail implements AsynchronousProcess {
     private ValidationService validationService;
 
     @Inject
-    private BukkitService bukkitService;
+    private EmailConfirmationManager emailConfirmationManager;
+
+    @Inject
+    private EmailSaver emailSaver;
 
     AsyncChangeEmail() {
     }
@@ -51,50 +49,45 @@ public class AsyncChangeEmail implements AsynchronousProcess {
      */
     public void changeEmail(Player player, String oldEmail, String newEmail) {
         String playerName = PlayerUtils.getName(player).toLowerCase(Locale.ROOT);
-        if (playerCache.isAuthenticated(playerName)) {
-            PlayerAuth auth = playerCache.getAuth(playerName);
-            String currentEmail = auth.getEmail();
 
-            if (currentEmail == null) {
-                service.send(player, MessageKey.USAGE_ADD_EMAIL);
-            } else if (newEmail == null || !validationService.validateEmail(newEmail)) {
-                service.send(player, MessageKey.INVALID_NEW_EMAIL);
-            } else if (!oldEmail.equalsIgnoreCase(currentEmail)) {
-                service.send(player, MessageKey.INVALID_OLD_EMAIL);
-            } else if (!validationService.isEmailFreeForRegistration(newEmail, player)) {
-                service.send(player, MessageKey.EMAIL_ALREADY_USED_ERROR);
-            } else {
-                saveNewEmail(auth, player, oldEmail, newEmail);
-            }
-        } else {
+        if (!playerCache.isAuthenticated(playerName)) {
             outputUnloggedMessage(player);
+            return;
+        }
+
+        PlayerAuth auth = playerCache.getAuth(playerName);
+        String currentEmail = auth.getEmail();
+
+        if (currentEmail == null) {
+            service.send(player, MessageKey.USAGE_ADD_EMAIL);
+        } else if (newEmail == null || !validationService.validateEmail(newEmail)) {
+            service.send(player, MessageKey.INVALID_NEW_EMAIL);
+        } else if (!oldEmail.equalsIgnoreCase(currentEmail)) {
+            service.send(player, MessageKey.INVALID_OLD_EMAIL);
+        } else if (!validationService.isEmailFreeForRegistration(newEmail, player)) {
+            service.send(player, MessageKey.EMAIL_ALREADY_USED_ERROR);
+        } else if (emailConfirmationManager.isConfirmationRequired()) {
+            requestConfirmation(player, oldEmail, newEmail);
+        } else {
+            emailSaver.saveEmail(auth, player, oldEmail, newEmail);
         }
     }
 
     /**
-     * Saves the new email value into the database and informs services.
+     * Mails a code to the new address; the player must send it back before the address is saved.
+     * The code goes to the new address, so confirming it proves the player can read mail there.
      *
-     * @param auth     the player auth object
-     * @param player   the player object
-     * @param oldEmail the old email value
-     * @param newEmail the new email value
+     * @param player the player who requested the change
+     * @param oldEmail the address being replaced
+     * @param newEmail the address to confirm
      */
-    private void saveNewEmail(PlayerAuth auth, Player player, String oldEmail, String newEmail) {
-        EmailChangedEvent event = bukkitService.createAndCallEvent(isAsync
-            -> new EmailChangedEvent(player, oldEmail, newEmail, isAsync));
-        if (event.isCancelled()) {
-            logger.info("Could not change email for player '" + player + "' – event was cancelled");
-            service.send(player, MessageKey.EMAIL_CHANGE_NOT_ALLOWED);
-            return;
-        }
-
-        auth.setEmail(newEmail);
-        if (dataSource.updateEmail(auth)) {
-            playerCache.updatePlayer(auth);
-            // TODO: send an update when a messaging service will be implemented (CHANGE_MAIL)
-            service.send(player, MessageKey.EMAIL_CHANGED_SUCCESS);
+    private void requestConfirmation(Player player, String oldEmail, String newEmail) {
+        String name = PlayerUtils.getName(player);
+        if (emailConfirmationManager.createAndSendCode(name, newEmail, oldEmail)) {
+            service.send(player, MessageKey.EMAIL_CONFIRMATION_SENT,
+                newEmail, String.valueOf(emailConfirmationManager.getExpirationMinutes()));
         } else {
-            service.send(player, MessageKey.ERROR);
+            service.send(player, MessageKey.EMAIL_SEND_FAILURE);
         }
     }
 

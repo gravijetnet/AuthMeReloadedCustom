@@ -1,14 +1,11 @@
 package fr.xephi.authme.process.email;
 
-import fr.xephi.authme.ConsoleLogger;
+import fr.xephi.authme.data.EmailConfirmationManager;
 import fr.xephi.authme.data.auth.PlayerAuth;
 import fr.xephi.authme.data.auth.PlayerCache;
 import fr.xephi.authme.datasource.DataSource;
-import fr.xephi.authme.events.EmailChangedEvent;
-import fr.xephi.authme.output.ConsoleLoggerFactory;
 import fr.xephi.authme.message.MessageKey;
 import fr.xephi.authme.process.AsynchronousProcess;
-import fr.xephi.authme.service.BukkitService;
 import fr.xephi.authme.service.CommonService;
 import fr.xephi.authme.service.ValidationService;
 import fr.xephi.authme.util.PlayerUtils;
@@ -23,8 +20,6 @@ import java.util.Locale;
  */
 public class AsyncAddEmail implements AsynchronousProcess {
 
-    private final ConsoleLogger logger = ConsoleLoggerFactory.get(AsyncAddEmail.class);
-
     @Inject
     private CommonService service;
 
@@ -38,7 +33,10 @@ public class AsyncAddEmail implements AsynchronousProcess {
     private ValidationService validationService;
 
     @Inject
-    private BukkitService bukkitService;
+    private EmailConfirmationManager emailConfirmationManager;
+
+    @Inject
+    private EmailSaver emailSaver;
 
     AsyncAddEmail() {
     }
@@ -52,36 +50,40 @@ public class AsyncAddEmail implements AsynchronousProcess {
     public void addEmail(Player player, String email) {
         String playerName = PlayerUtils.getName(player).toLowerCase(Locale.ROOT);
 
-        if (playerCache.isAuthenticated(playerName)) {
-            PlayerAuth auth = playerCache.getAuth(playerName);
-            String currentEmail = auth.getEmail();
-
-            if (!Utils.isEmailEmpty(currentEmail)) {
-                service.send(player, MessageKey.USAGE_CHANGE_EMAIL);
-            } else if (!validationService.validateEmail(email)) {
-                service.send(player, MessageKey.INVALID_EMAIL);
-            } else if (!validationService.isEmailFreeForRegistration(email, player)) {
-                service.send(player, MessageKey.EMAIL_ALREADY_USED_ERROR);
-            } else {
-                EmailChangedEvent event = bukkitService.createAndCallEvent(isAsync
-                    -> new EmailChangedEvent(player, null, email, isAsync));
-                if (event.isCancelled()) {
-                    logger.info("Could not add email to player '" + player + "' – event was cancelled");
-                    service.send(player, MessageKey.EMAIL_ADD_NOT_ALLOWED);
-                    return;
-                }
-                auth.setEmail(email);
-                if (dataSource.updateEmail(auth)) {
-                    playerCache.updatePlayer(auth);
-                    // TODO: send an update when a messaging service will be implemented (ADD_MAIL)
-                    service.send(player, MessageKey.EMAIL_ADDED_SUCCESS);
-                } else {
-                    logger.warning("Could not save email for player '" + player + "'");
-                    service.send(player, MessageKey.ERROR);
-                }
-            }
-        } else {
+        if (!playerCache.isAuthenticated(playerName)) {
             sendUnloggedMessage(player);
+            return;
+        }
+
+        PlayerAuth auth = playerCache.getAuth(playerName);
+        String currentEmail = auth.getEmail();
+
+        if (!Utils.isEmailEmpty(currentEmail)) {
+            service.send(player, MessageKey.USAGE_CHANGE_EMAIL);
+        } else if (!validationService.validateEmail(email)) {
+            service.send(player, MessageKey.INVALID_EMAIL);
+        } else if (!validationService.isEmailFreeForRegistration(email, player)) {
+            service.send(player, MessageKey.EMAIL_ALREADY_USED_ERROR);
+        } else if (emailConfirmationManager.isConfirmationRequired()) {
+            requestConfirmation(player, email);
+        } else {
+            emailSaver.saveEmail(auth, player, null, email);
+        }
+    }
+
+    /**
+     * Mails a code to the given address; the player must send it back before the address is saved.
+     *
+     * @param player the player who supplied the address
+     * @param email the address to confirm
+     */
+    private void requestConfirmation(Player player, String email) {
+        String name = PlayerUtils.getName(player);
+        if (emailConfirmationManager.createAndSendCode(name, email, null)) {
+            service.send(player, MessageKey.EMAIL_CONFIRMATION_SENT,
+                email, String.valueOf(emailConfirmationManager.getExpirationMinutes()));
+        } else {
+            service.send(player, MessageKey.EMAIL_SEND_FAILURE);
         }
     }
 

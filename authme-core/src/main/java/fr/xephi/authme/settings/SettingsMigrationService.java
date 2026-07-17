@@ -183,6 +183,9 @@ public class SettingsMigrationService extends PlainMigrationService {
             .replace("<image>", "<image />").replace("%image%", "<image />");
         if (!emailFile.exists()) {
             try (FileWriter fw = new FileWriter(emailFile)) {
+                // Stamp the current version so that this text, which the admin configured, is not
+                // taken for an outdated default and replaced with the bundled template.
+                fw.write(Settings.EMAIL_TEMPLATE_VERSION_MARKER + System.lineSeparator());
                 fw.write(mailText);
             } catch (IOException e) {
                 logger.logException("Could not create email.html configuration file:", e);

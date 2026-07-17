@@ -1,5 +1,6 @@
 package fr.xephi.authme.velocity;
 
+import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import com.velocitypowered.api.command.CommandSource;
@@ -37,6 +38,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -333,12 +335,69 @@ class VelocityProxyBridgeTest {
         given(authServerInfo.getName()).willReturn("lobby");
         given(nonAuthServer.getServerInfo()).willReturn(nonAuthServerInfo);
         given(nonAuthServerInfo.getName()).willReturn("survival");
+        given(player.getUsername()).willReturn("Alice");
 
         VelocityProxyBridge bridge = new VelocityProxyBridge(proxyServer, logger, createConfiguration(), new VelocityAuthenticationStore());
         bridge.onPluginMessage(pluginMessageEvent);
         bridge.onServerConnected(new ServerConnectedEvent(player, nonAuthServer, null));
 
         verify(currentServer, never()).sendPluginMessage(any(), any(byte[].class));
+    }
+
+    // --- Auth state re-sync tests ---
+
+    @Test
+    void shouldAskAuthServerForStateOfUnknownPlayer() {
+        // given: a player the proxy has no auth state for connects to an auth server. Their login message may
+        // have been missed (proxy restart, or another plugin logged them in before we knew about them).
+        given(authServer.getServerInfo()).willReturn(authServerInfo);
+        given(authServerInfo.getName()).willReturn("lobby");
+        given(player.getUsername()).willReturn("Alice");
+        given(proxyServer.getPlayer("alice")).willReturn(Optional.of(player));
+
+        VelocityProxyBridge bridge = new VelocityProxyBridge(proxyServer, logger, createConfiguration(), new VelocityAuthenticationStore());
+        bridge.onServerConnected(new ServerConnectedEvent(player, authServer, null));
+
+        // then: the proxy asks the backend rather than silently assuming the player is unauthenticated.
+        // The server also receives the proxy.started handshake, so look for the status request among the sends.
+        ArgumentCaptor<byte[]> payload = ArgumentCaptor.forClass(byte[].class);
+        verify(authServer, timeout(3000).atLeast(2))
+            .sendPluginMessage(eq(VelocityProxyBridge.AUTHME_CHANNEL), payload.capture());
+
+        Optional<byte[]> statusRequest = payload.getAllValues().stream()
+            .filter(data -> "status.request".equals(ByteStreams.newDataInput(data).readUTF()))
+            .findFirst();
+        assertTrue(statusRequest.isPresent(), "Expected a status.request to be sent to the auth server");
+        ByteArrayDataInput in = ByteStreams.newDataInput(statusRequest.get());
+        in.readUTF();
+        assertEquals("alice", in.readUTF());
+        bridge.shutdown();
+    }
+
+    @Test
+    void shouldNotAskAuthServerForStateOfKnownAuthenticatedPlayer() throws InterruptedException {
+        // given
+        given(authServer.getServerInfo()).willReturn(authServerInfo);
+        given(authServerInfo.getName()).willReturn("lobby");
+        given(player.getUsername()).willReturn("Alice");
+        given(player.getCurrentServer()).willReturn(Optional.of(currentServer));
+        given(currentServer.getServer()).willReturn(authServer);
+        VelocityAuthenticationStore store = new VelocityAuthenticationStore();
+        store.markAuthenticated("alice");
+
+        VelocityProxyBridge bridge = new VelocityProxyBridge(proxyServer, logger, createConfiguration(), store);
+        bridge.onServerConnected(new ServerConnectedEvent(player, authServer, null));
+
+        // then: nothing to ask about — the auto-login path owns this case. The proxy.started handshake still
+        // goes out, so assert specifically that no status request is among the messages sent.
+        Thread.sleep(1500);
+        ArgumentCaptor<byte[]> payload = ArgumentCaptor.forClass(byte[].class);
+        verify(authServer, org.mockito.Mockito.atLeastOnce())
+            .sendPluginMessage(eq(VelocityProxyBridge.AUTHME_CHANNEL), payload.capture());
+        boolean askedForStatus = payload.getAllValues().stream()
+            .anyMatch(data -> "status.request".equals(ByteStreams.newDataInput(data).readUTF()));
+        assertFalse(askedForStatus, "Should not ask for the state of a player already known to be authenticated");
+        bridge.shutdown();
     }
 
     // --- Command blocking tests ---

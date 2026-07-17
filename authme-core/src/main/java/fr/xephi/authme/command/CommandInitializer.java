@@ -34,6 +34,7 @@ import fr.xephi.authme.command.executable.captcha.CaptchaCommand;
 import fr.xephi.authme.command.executable.changepassword.ChangePasswordCommand;
 import fr.xephi.authme.command.executable.email.AddEmailCommand;
 import fr.xephi.authme.command.executable.email.ChangeEmailCommand;
+import fr.xephi.authme.command.executable.email.ConfirmEmailCommand;
 import fr.xephi.authme.command.executable.email.EmailBaseCommand;
 import fr.xephi.authme.command.executable.email.EmailSetPasswordCommand;
 import fr.xephi.authme.command.executable.email.ProcessCodeCommand;
@@ -530,6 +531,17 @@ public class CommandInitializer {
             .withArgument("newEmail", "New email address", MANDATORY)
             .permission(PlayerPermission.CHANGE_EMAIL)
             .executableCommand(ChangeEmailCommand.class)
+            .register();
+
+        // Register the confirm command. It needs no permission of its own: it only ever acts on an
+        // address the player supplied through /email add or /email change, which are both gated.
+        CommandDescription.builder()
+            .parent(emailBase)
+            .labels("confirm", "confirmemail", "confirmmail")
+            .description("Confirm Email")
+            .detailedDescription("Confirm the email address you added with the code sent to it.")
+            .withArgument("code", "Confirmation code", MANDATORY)
+            .executableCommand(ConfirmEmailCommand.class)
             .register();
 
         // Register the recover command

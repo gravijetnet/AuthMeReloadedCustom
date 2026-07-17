@@ -84,6 +84,12 @@ on_join_validation:
 email:
   usage_email_add: '&cUsage: /email add <email> <confirmEmail>'
   usage_email_change: '&cUsage: /email change <oldEmail> <newEmail>'
+  usage_email_confirm: '&cUsage: /email confirm <code>'
+  confirmation:
+    code_sent: '&3A confirmation code was sent to &f%email&3. Enter it with &f/email confirm <code>&3 within %minutes minutes.'
+    no_pending: '&cYou have no email address waiting to be confirmed. Add one with /email add <email> <confirmEmail>.'
+    incorrect_code: '&cIncorrect confirmation code! You have %count tries remaining.'
+    tries_exceeded: '&cToo many wrong codes. Your email address was discarded — start over with /email add <email> <confirmEmail>.'
   new_email_invalid: '&cInvalid new email, try again!'
   old_email_invalid: '&cInvalid old email, try again!'
   invalid: '&cInvalid email address, try again!'

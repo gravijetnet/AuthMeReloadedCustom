@@ -128,9 +128,11 @@ public class SettingsMigrationServiceTest {
         assertThat(settings.getProperty(LEGACY_HASHES), contains(HashAlgorithm.PBKDF2, HashAlgorithm.WORDPRESS, HashAlgorithm.SHA512));
         assertThat(settings.getProperty(MYSQL_COL_SALT), equalTo("salt_col_name"));
 
-        // Check migration of old setting to email.html
+        // Check migration of old setting to email.html. The migrated text is the admin's own, so it
+        // carries the current template version and is not replaced by the bundled template.
         assertThat(Files.readLines(new File(dataFolder, "email.html"), StandardCharsets.UTF_8),
-            contains("Dear <playername />, <br /><br /> This is your new AuthMe password for the server "
+            contains(Settings.EMAIL_TEMPLATE_VERSION_MARKER,
+                "Dear <playername />, <br /><br /> This is your new AuthMe password for the server "
                 + "<br /><br /> <servername /> : <br /><br /> <generatedpass /><br /><image /><br />Do not forget to "
                 + "change password after login! <br /> /changepassword <generatedpass /> newPassword"));
     }

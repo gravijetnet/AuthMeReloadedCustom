@@ -1,5 +1,5 @@
 <!-- AUTO-GENERATED FILE! Do not edit this directly -->
-<!-- File auto-generated on Thu Apr 23 19:32:20 CEST 2026. See authme-tools/src/test/java/tools/docs/commands/commands.tpl.md -->
+<!-- File auto-generated on Fri Jul 17 08:48:22 CEST 2026. See authme-tools/src/test/java/tools/docs/commands/commands.tpl.md -->
 
 ## AuthMe Commands
 You can use the following commands to use the features of AuthMe. Mandatory arguments are marked with `< >`
@@ -69,6 +69,7 @@ The command tree is shared across the current Spigot Legacy, Spigot 1.21, and Pa
   <br />Requires `authme.player.email.add`
 - **/email change** &lt;oldEmail> &lt;newEmail>: Change an email address of your account.
   <br />Requires `authme.player.email.change`
+- **/email confirm** &lt;code>: Confirm the email address you added with the code sent to it.
 - **/email recover** &lt;email>: Recover your account using an Email address by sending a mail containing a new password.
   <br />Requires `authme.player.email.recover`
 - **/email code** &lt;code>: Recover your account by submitting a code delivered to your email.
@@ -110,4 +111,4 @@ The command tree is shared across the current Spigot Legacy, Spigot 1.21, and Pa
 
 ---
 
-This page was automatically generated on the [AuthMe/AuthMeReloaded repository](https://github.com/AuthMe/AuthMeReloaded/tree/master/docs/) on Thu Apr 23 19:32:20 CEST 2026
+This page was automatically generated on the [AuthMe/AuthMeReloaded repository](https://github.com/AuthMe/AuthMeReloaded/tree/master/docs/) on Fri Jul 17 08:48:22 CEST 2026

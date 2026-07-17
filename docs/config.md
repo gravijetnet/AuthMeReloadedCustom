@@ -1,5 +1,5 @@
 <!-- AUTO-GENERATED FILE! Do not edit this directly -->
-<!-- File auto-generated on Tue Apr 28 23:00:57 CEST 2026. See authme-tools/src/test/java/tools/docs/config/config.tpl.md -->
+<!-- File auto-generated on Fri Jul 17 08:48:22 CEST 2026. See authme-tools/src/test/java/tools/docs/config/config.tpl.md -->
 
 ## AuthMe Configuration
 The first time you run AuthMe it will create a config.yml file in the plugins/AuthMe folder,
@@ -414,6 +414,17 @@ Email:
     mailSubject: Your new AuthMe password
     # Like maxRegPerIP but with email
     maxRegPerEmail: 1
+    # Make players confirm an email address before it is saved?
+    # When enabled, /email add and /email change send a code to the given address and
+    # only store it once the player enters it with /email confirm <code>.
+    # Has no effect while the mail settings above are incomplete: AuthMe cannot send the
+    # code then and saves the address right away.
+    requireConfirmation: true
+    # Minutes an email confirmation code stays valid
+    confirmationCodeExpirationMinutes: 15
+    # How many wrong confirmation codes a player may enter before the pending address is
+    # discarded and they have to start over with /email add
+    confirmationMaxTries: 3
     # Recall players to add an email?
     recallPlayers: false
     # Delay in minute for the recall scheduler
@@ -621,4 +632,4 @@ To change settings on a running server, save your changes to config.yml and use
 
 ---
 
-This page was automatically generated on the [AuthMe/AuthMeReloaded repository](https://github.com/AuthMe/AuthMeReloaded/tree/master/docs/) on Tue Apr 28 23:00:57 CEST 2026
+This page was automatically generated on the [AuthMe/AuthMeReloaded repository](https://github.com/AuthMe/AuthMeReloaded/tree/master/docs/) on Fri Jul 17 08:48:22 CEST 2026

@@ -75,6 +75,8 @@ public class EmailService {
                     "Unable to send new password as image for email " + mailAddress + ":", e);
             }
         }
+        // Drop the tag if no image was embedded, or clients render it as a broken image
+        mailText = mailText.replace("<image />", "");
 
         boolean couldSendEmail = sendMailSsl.sendEmail(mailText, email);
         FileUtils.delete(file);
@@ -105,6 +107,33 @@ public class EmailService {
 
         String mailText = replaceTagsForVerificationEmail(settings.getVerificationEmailMessage(), name, code,
             settings.getProperty(SecuritySettings.VERIFICATION_CODE_EXPIRATION_MINUTES));
+        return sendMailSsl.sendEmail(mailText, email);
+    }
+
+    /**
+     * Sends an email to the address a player supplied, with the code they must enter to confirm it.
+     *
+     * @param name the name of the player
+     * @param mailAddress the address to confirm
+     * @param code the confirmation code
+     * @return true if email could be sent, false otherwise
+     */
+    public boolean sendEmailConfirmationMail(String name, String mailAddress, String code) {
+        if (!hasAllInformation()) {
+            logger.warning("Cannot send email confirmation: not all email settings are complete");
+            return false;
+        }
+
+        HtmlEmail email;
+        try {
+            email = sendMailSsl.initializeMail(mailAddress);
+        } catch (EmailException e) {
+            logger.logException("Failed to create email confirmation with the given settings:", e);
+            return false;
+        }
+
+        String mailText = replaceTagsForEmailConfirmation(settings.getEmailConfirmationMessage(), name, code,
+            settings.getProperty(EmailSettings.CONFIRMATION_CODE_EXPIRATION_MINUTES));
         return sendMailSsl.sendEmail(mailText, email);
     }
 
@@ -156,6 +185,14 @@ public class EmailService {
             .replace("<playername />", name)
             .replace("<servername />", settings.getProperty(PluginSettings.SERVER_NAME))
             .replace("<generatedcode />", code)
+            .replace("<minutesvalid />", String.valueOf(minutesValid));
+    }
+
+    private String replaceTagsForEmailConfirmation(String mailText, String name, String code, int minutesValid) {
+        return mailText
+            .replace("<playername />", name)
+            .replace("<servername />", settings.getProperty(PluginSettings.SERVER_NAME))
+            .replace("<confirmationcode />", code)
             .replace("<minutesvalid />", String.valueOf(minutesValid));
     }
 

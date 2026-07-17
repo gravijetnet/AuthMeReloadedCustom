@@ -41,6 +41,7 @@ final class VelocityProxyBridge {
     private static final String PERFORM_LOGIN_MESSAGE = "perform.login";
     private static final String PERFORM_LOGIN_ACK_MESSAGE = "perform.login.ack";
     private static final String PROXY_STARTED_MESSAGE = "proxy.started";
+    private static final String STATUS_REQUEST_MESSAGE = "status.request";
     private static final String PROXY_IDENTITY = "velocity";
     private static final int MAX_RETRIES = 3;
 
@@ -184,6 +185,15 @@ final class VelocityProxyBridge {
 
         sendProxyStartedHandshakeIfPending(event.getServer());
 
+        String normalizedName = normalizeName(playerName);
+
+        // The proxy only learns about logins from the backend's push, and that push is easy to miss: the player
+        // may have been logged in before this proxy came up, or before we knew about their connection. Ask the
+        // auth server for the current state whenever we don't know the player.
+        if (configuration.isAuthServer(event.getServer()) && !authenticationStore.isAuthenticated(normalizedName)) {
+            scheduleStatusRequest(normalizedName, event.getServer());
+        }
+
         if (!configuration.autoLoginEnabled()) {
             logger.debug("autoLogin is disabled, skipping auto-login for {}", playerName);
             return;
@@ -199,8 +209,6 @@ final class VelocityProxyBridge {
             logger.debug("Skipping auto-login for {} — server transition not involving an auth server", playerName);
             return;
         }
-
-        String normalizedName = normalizeName(playerName);
 
         if (!authenticationStore.isAuthenticated(normalizedName)) {
             logger.debug("Skipping auto-login for {} — not marked as authenticated on the proxy", normalizedName);
@@ -347,6 +355,48 @@ final class VelocityProxyBridge {
             logger.info("Failed to send deferred proxy.started handshake to '{}'; scheduling retry", serverName);
             retryScheduler.schedule(() -> sendProxyStartedHandshakeIfPending(server), 1, TimeUnit.SECONDS);
         }
+    }
+
+    /**
+     * Asks an auth server for a player's current authentication state, shortly after they connect so that the
+     * backend has had time to finish its own join handling (session resume, FastLogin premium auto-login, ...).
+     *
+     * @param normalizedName the lowercase name of the player to ask about
+     * @param server the auth server the player connected to
+     */
+    private void scheduleStatusRequest(String normalizedName, RegisteredServer server) {
+        retryScheduler.schedule(() -> sendStatusRequest(normalizedName, server, 0), 1, TimeUnit.SECONDS);
+    }
+
+    private void sendStatusRequest(String normalizedName, RegisteredServer server, int attempt) {
+        if (proxyServer.getPlayer(normalizedName).isEmpty()) {
+            return;
+        }
+        if (authenticationStore.isAuthenticated(normalizedName)) {
+            // The backend's login message arrived in the meantime — nothing to ask about.
+            return;
+        }
+
+        String serverName = server.getServerInfo().getName();
+        if (server.sendPluginMessage(AUTHME_CHANNEL, createStatusRequestMessage(normalizedName))) {
+            logger.debug("Asked auth server '{}' for the authentication state of {}", serverName, normalizedName);
+            return;
+        }
+
+        int nextAttempt = attempt + 1;
+        if (nextAttempt >= MAX_RETRIES) {
+            logger.debug("Could not deliver a status request for {} to '{}' after {} attempts; giving up",
+                normalizedName, serverName, MAX_RETRIES);
+            return;
+        }
+        retryScheduler.schedule(() -> sendStatusRequest(normalizedName, server, nextAttempt), 1, TimeUnit.SECONDS);
+    }
+
+    private byte[] createStatusRequestMessage(String normalizedName) {
+        ByteArrayDataOutput output = ByteStreams.newDataOutput();
+        output.writeUTF(STATUS_REQUEST_MESSAGE);
+        output.writeUTF(normalizedName);
+        return output.toByteArray();
     }
 
     private void initiatePendingLogin(String normalizedName) {
