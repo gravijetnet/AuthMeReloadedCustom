@@ -114,3 +114,21 @@ nb-configuration.xml
 ### Git ###
 # Don't exclude the .gitignore itself
 !.gitignore
+
+**/node_modules/
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+!**/.env.example
+!**/.env.sample
+!**/.env.template
+.claude/
+.codex/
+*.jks
+*.keystore
+key.properties
+google-services.json
+firebase-service-account.json
+auth_cache/
