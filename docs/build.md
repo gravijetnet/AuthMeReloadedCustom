@@ -1,6 +1,4 @@
-# Building and Development Commands
-
-This page documents the main build, test, and tooling commands used in this repository.
+# Build and test
 
 ## Requirements
 
